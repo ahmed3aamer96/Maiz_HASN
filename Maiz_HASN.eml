@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component inherit-compiler-output="true" inheritJdk="true">
+	<output-test url="file://$MODULE_DIR$/out/test/Maiz_HASN"/>
+	<exclude-output/>
+	<contentEntry url="file://$MODULE_DIR$"/>
+	<lib name="stdlib-package.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/stdlib-package.jar!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/stdlib-package.jar!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/stdlib-package.jar!/"/>
+	</lib>
+	<lib name="stdlib.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/stdlib.jar!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/stdlib.jar!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/stdlib.jar!/"/>
+	</lib>
+</component>
