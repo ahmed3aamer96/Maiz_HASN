@@ -15,9 +15,9 @@ public class Main {
     private int n;                 // dimension of maze
     private int end1,end2 ;
     private int start1,start2 ;
-    private boolean[][] north;     // is there a wall to north of cell i, j
-    private boolean[][] east;
-    private boolean[][] south;
+    private boolean[][] northwall;     // is there a wall to north of cell i, j
+    private boolean[][] eastwall;
+    private boolean[][] southwall;
     private boolean[][] west;
     private boolean[][] visited;
     private boolean done = false;
@@ -44,15 +44,15 @@ public class Main {
 
 
         // initialze all walls as present
-        north = new boolean[n + 2][n + 2];
-        east = new boolean[n + 2][n + 2];
-        south = new boolean[n + 2][n + 2];
+        northwall = new boolean[n + 2][n + 2];
+        eastwall = new boolean[n + 2][n + 2];
+        southwall = new boolean[n + 2][n + 2];
         west = new boolean[n + 2][n + 2];
         for (int x = 0; x < n + 2; x++) {
             for (int y = 0; y < n + 2; y++) {
-                north[x][y] = true;
-                east[x][y] = true;
-                south[x][y] = true;
+                northwall[x][y] = true;
+                eastwall[x][y] = true;
+                southwall[x][y] = true;
                 west[x][y] = true;
             }
         }
@@ -70,23 +70,23 @@ public class Main {
             while (true) {
                 double r = StdRandom.uniform(4);
                 if (r == 0 && !visited[x][y + 1]) {
-                    north[x][y] = false;
-                    south[x][y + 1] = false;
+                    northwall[x][y] = false;
+                    southwall[x][y + 1] = false;
                     generate(x, y + 1);
                     break;
                 } else if (r == 1 && !visited[x + 1][y]) {
-                    east[x][y] = false;
+                    eastwall[x][y] = false;
                     west[x + 1][y] = false;
                     generate(x + 1, y);
                     break;
                 } else if (r == 2 && !visited[x][y - 1]) {
-                    south[x][y] = false;
-                    north[x][y - 1] = false;
+                    southwall[x][y] = false;
+                    northwall[x][y - 1] = false;
                     generate(x, y - 1);
                     break;
                 } else if (r == 3 && !visited[x - 1][y]) {
                     west[x][y] = false;
-                    east[x - 1][y] = false;
+                    eastwall[x - 1][y] = false;
                     generate(x - 1, y);
                     break;
                 }
@@ -107,14 +107,14 @@ public class Main {
         for (int i = 0; i < n; i++) {
             int x = 1 + StdRandom.uniform(n-1);
             int y = 1 + StdRandom.uniform(n-1);
-            north[x][y] = south[x][y+1] = false;
+            northwall[x][y] = southwall[x][y+1] = false;
         }
 
         // add some random walls
         for (int i = 0; i < 10; i++) {
             int x = n/2 + StdRandom.uniform(n/2);
             int y = n/2 + StdRandom.uniform(n/2);
-            east[x][y] = west[x+1][y] = true;
+            eastwall[x][y] = west[x+1][y] = true;
         }
 
         start1=1+StdRandom.uniform(n-1);
@@ -124,44 +124,52 @@ public class Main {
 
     }
 
-/*
-    // solve the maze using depth-first search
-    private void solve(int x, int y) {
-        if (x == 0 || y == 0 || x == n + 1 || y == n + 1) return;
-        if (done || visited[x][y]) return;
-        visited[x][y] = true;
-        int a,b;
-        a= StdRandom.uniform(n);
-        b= StdRandom.uniform(n);
 
-        StdDraw.setPenColor(StdDraw.YELLOW);
-        filledCircle(a + 0.5, b + 0.5, 0.25);
-        StdDraw.show();
-        StdDraw.pause(30);
+    // solve the maze using depth-first search
+    private int solve1(int x, int y,int end1 , int end2) {
+        if (x == 0 || y == 0 || x == n + 1 || y == n + 1) return 0;
+        if ( visited[x][y]) return 0;
+        if(done) return 1;
+        visited[x][y] = true;
+       // int a,b;
+     //   a= StdRandom.uniform(n);
+       // b= StdRandom.uniform(n);
+
+
 
         StdDraw.setPenColor(StdDraw.BLUE);
         filledCircle(x + 0.5, y + 0.5, 0.25);
         StdDraw.show();
         StdDraw.pause(30);
+//handle exception if there is no way
 
-        // reached middle
-        if (x == a && y == b) done = true;
+        // reached to end
+        if (x == end1 && y == end2) done = true;
 
-        if (!north[x][y]) solve(x, y + 1);
-        if (!east[x][y]) solve(x + 1, y);
-        if (!south[x][y]) solve(x, y - 1);
-        if (!west[x][y]) solve(x - 1, y);
+        if (!northwall[x][y]) solve1(x, y + 1,end1,end2);
+        if (!eastwall[x][y]) solve1(x + 1, y,end1,end2);
+        if (!southwall[x][y]) solve1(x, y - 1,end1,end2);
+        if (!west[x][y]) solve1(x - 1, y,end1,end2);
 
-        if (done) return;
+        if (done) return 1;
 
         StdDraw.setPenColor(StdDraw.GRAY);
         filledCircle(x + 0.5, y + 0.5, 0.25);
         StdDraw.show();
         StdDraw.pause(30);
+        return 0;
     }
-*/
+
+    //to make each element unvested again
+    void restart(){
+        for (int x = 1; x < n; x++)
+            for (int y = 1; y < n; y++)
+                visited[x][y] = false;
+        done = false;
+    }
+
     // solve the maze starting from the start state
-   /*   public void solve() {
+ /*     public void solve() {
         for (int x = 1; x < n; x++)
             for (int y = 1; y < n; y++)
                 visited[x][y] = false;
@@ -169,19 +177,22 @@ public class Main {
         solve(1, 1);
     }
 */
+
     // draw the maze
     public void draw() {
         StdDraw.setPenColor(StdDraw.RED);
-        StdDraw.filledCircle(end1+0.5 , end2+0.5 , 0.375);
         StdDraw.filledCircle(start1+0.5, start2+0.5, 0.375);
+
+        StdDraw.setPenColor(StdDraw.YELLOW);
+        filledCircle(end1 + 0.5, end2 + 0.5, 0.375);
 
         StdDraw.setPenColor(StdDraw.BLACK);
         for (int x = 1; x < n; x++) {
             for (int y = 1; y < n; y++) {
-                if (south[x][y]) StdDraw.line(x, y, x + 1, y);
-                if (north[x][y]) StdDraw.line(x, y + 1, x + 1, y + 1);
+                if (southwall[x][y]) StdDraw.line(x, y, x + 1, y);
+                if (northwall[x][y]) StdDraw.line(x, y + 1, x + 1, y + 1);
                 if (west[x][y]) StdDraw.line(x, y, x, y + 1);
-                if (east[x][y]) StdDraw.line(x + 1, y, x + 1, y + 1);
+                if (eastwall[x][y]) StdDraw.line(x + 1, y, x + 1, y + 1);
             }
         }
         StdDraw.show();
@@ -192,15 +203,33 @@ public class Main {
     public static void main(String[] args) {
 
         Scanner input = new Scanner(System.in);
-        int n = input.nextInt();
-        Main maze = new Main(n);
+        int size = input.nextInt();
+        Main maze = new Main(size);
         StdDraw.enableDoubleBuffering();
         maze.draw();
       //  maze.solve();
-        System.out.println(maze.start1);
+        System.out.println("choose the algoritm 1,2,3,4");
+        int algo = input.nextInt();
+        maze.restart();
+        if (algo == 1) {
+            int issolvable ;
+            issolvable = maze.solve1(maze.start1, maze.start2, maze.end1, maze.end2);
+            System.out.println(issolvable);
+        }
+
+
+
+
+        // else if (algo == 2)maiz.solve2(maze.start1,maze.start2,maze.end1,maze.end2);
+       // else if (algo == 3)maiz.solve3(maze.start1,maze.start2,maze.end1,maze.end2);
+       // else if (algo == 4)maiz.solve4(maze.start1,maze.start2,maze.end1,maze.end2);
+
+        /*System.out.println(maze.start1);
         System.out.println(maze.start2);
         System.out.println(maze.end1);
         System.out.println(maze.end2);
+*/
     }
+
 
 }
