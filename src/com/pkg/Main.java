@@ -3,6 +3,7 @@ import java.util.*;
 
 import edu.princeton.cs.introcs.*;
 import static edu.princeton.cs.introcs.StdDraw.filledCircle;
+import static edu.princeton.cs.introcs.StdDraw.filledSquare;
 import static edu.princeton.cs.introcs.StdDraw.setPenColor;
 
 
@@ -21,6 +22,13 @@ public class Main {
     private boolean[][] west;
     private boolean[][] visited;
     private boolean done = false;
+    //private boolean[][] block;
+    private int currentx,currenty; //to use in the second algorithm
+    private int[]keepx;
+    private int[]keepy;
+
+
+
 
     public Main(int n) {
         this.n = n;
@@ -48,6 +56,8 @@ public class Main {
         eastwall = new boolean[n + 2][n + 2];
         southwall = new boolean[n + 2][n + 2];
         west = new boolean[n + 2][n + 2];
+
+       // block = new boolean [n+2][n+2];
         for (int x = 0; x < n + 2; x++) {
             for (int y = 0; y < n + 2; y++) {
                 northwall[x][y] = true;
@@ -66,12 +76,14 @@ public class Main {
         // while there is an unvisited neighbor
         while (!visited[x][y + 1] || !visited[x + 1][y] || !visited[x][y - 1] || !visited[x - 1][y]) {
 
-            // pick random neighbor (could use Knuth's trick instead)
+            // pick random neighbor
             while (true) {
                 double r = StdRandom.uniform(4);
                 if (r == 0 && !visited[x][y + 1]) {
                     northwall[x][y] = false;
                     southwall[x][y + 1] = false;
+
+
                     generate(x, y + 1);
                     break;
                 } else if (r == 1 && !visited[x + 1][y]) {
@@ -92,10 +104,7 @@ public class Main {
                 }
             }
         }
-        start1=1+StdRandom.uniform(n-1);
-        start2=1+StdRandom.uniform(n-1);
-        end1= 1+StdRandom.uniform(n-1);
-        end2= 1+StdRandom.uniform(n-1);
+
     }
 
     // generate the maze starting from lower left
@@ -108,6 +117,7 @@ public class Main {
             int x = 1 + StdRandom.uniform(n-1);
             int y = 1 + StdRandom.uniform(n-1);
             northwall[x][y] = southwall[x][y+1] = false;
+
         }
 
         // add some random walls
@@ -126,39 +136,139 @@ public class Main {
 
 
     // solve the maze using depth-first search
-    private int solve1(int x, int y,int end1 , int end2) {
-        if (x == 0 || y == 0 || x == n + 1 || y == n + 1) return 0;
-        if ( visited[x][y]) return 0;
-        if(done) return 1;
+    private boolean DFS(int x, int y) {
+        if (x == 0 || y == 0 || x == n + 1 || y == n + 1) return false;
+        if ( visited[x][y]) return false;
+        if(done) return true;
         visited[x][y] = true;
-       // int a,b;
-     //   a= StdRandom.uniform(n);
-       // b= StdRandom.uniform(n);
-
-
-
         StdDraw.setPenColor(StdDraw.BLUE);
-        filledCircle(x + 0.5, y + 0.5, 0.25);
+        filledSquare(x + 0.5, y + 0.5, 0.25);
         StdDraw.show();
         StdDraw.pause(30);
-//handle exception if there is no way
+
+
 
         // reached to end
         if (x == end1 && y == end2) done = true;
 
-        if (!northwall[x][y]) solve1(x, y + 1,end1,end2);
-        if (!eastwall[x][y]) solve1(x + 1, y,end1,end2);
-        if (!southwall[x][y]) solve1(x, y - 1,end1,end2);
-        if (!west[x][y]) solve1(x - 1, y,end1,end2);
+        if (!northwall[x][y]) DFS(x, y + 1);
+        if (!eastwall[x][y]) DFS(x + 1, y);
+        if (!southwall[x][y]) DFS(x, y - 1);
+        if (!west[x][y]) DFS(x - 1, y);
 
-        if (done) return 1;
+        if (done) return true;
 
         StdDraw.setPenColor(StdDraw.GRAY);
-        filledCircle(x + 0.5, y + 0.5, 0.25);
+        filledSquare(x + 0.5, y + 0.5, 0.25);
         StdDraw.show();
         StdDraw.pause(30);
-        return 0;
+        return false;
     }
+
+
+/*
+void fill(int i,int j){
+}
+    //the second algorithm (End Filling)
+    boolean EndFilling(int x, int y ){
+        for(int i =0 ;i< n ;i++){
+            for(int j=0;j< n ;j++){
+                if(southwall[i][j] == true && eastwall[i][j]== true && west [i][j]== true) {
+                    block[i][j] = true;
+                    fill(i,j);
+                }
+            }
+        }
+        return false ;
+    }
+*/
+
+
+
+
+boolean Amer(){
+
+    StdDraw.setPenColor(StdDraw.BLUE);
+    currentx =start1;
+    currenty = start2;
+    keepx = new int [n*n];
+    keepy = new int [n*n];
+    int a=0;
+
+    while(true) {
+
+
+        int c = 0; //count there is how many junction
+        if (!eastwall[currentx][currenty]&& !visited[currentx + 1][currenty]) c++;
+        if (!west[currentx][currenty] && !visited[currentx-1][currenty]) c++;
+        if (!southwall[currentx][currenty] && !visited[currentx ][currenty-1]) c++;
+        if (!northwall[currentx][currenty]&& !visited[currentx][currenty+1]) c++;
+
+
+            while (c > 1) {
+                a++;
+                keepx[a] = currentx;
+                keepy[a] = currenty;
+                c--;
+            }
+
+
+        //if more than one way finish them one by one
+
+            //start looking at right first
+            if (!eastwall[currentx][currenty] && !visited[currentx + 1][currenty]) {
+
+                currentx++;
+                visited[currentx][currenty] = true;
+                filledSquare(currentx + 0.5, currenty + 0.5, 0.25);
+                StdDraw.show();
+                StdDraw.pause(30);
+                if (currentx == end1 && currenty == end2) break;
+            }
+            else if (!northwall[currentx][currenty] && !visited[currentx][currenty+1]) {
+                currenty++;
+                visited[currentx][currenty] = true;
+                filledSquare(currentx + 0.5, currenty + 0.5, 0.25);
+                StdDraw.show();
+                StdDraw.pause(30);
+                if (currentx == end1 && currenty == end2) break;
+            }
+            else if (!southwall[currentx][currenty] && !visited[currentx ][currenty-1]) {
+                currenty--;
+                visited[currentx][currenty] = true;
+                filledSquare(currentx + 0.5, currenty + 0.5, 0.25);
+                StdDraw.show();
+                StdDraw.pause(30);
+                if (currentx == end1 && currenty == end2) break;
+            }
+            else if (!west[currentx][currenty] && !visited[currentx-1][currenty]) {
+                currentx--;
+                visited[currentx][currenty] = true;
+                filledSquare(currentx + 0.5, currenty + 0.5, 0.25);
+                StdDraw.show();
+                StdDraw.pause(30);
+                if (currentx == end1 && currenty == end2) break;
+            }
+            else {
+
+                if (currentx == end1 && currenty == end2) break;
+                if(a==0)break;
+                currentx = keepx[a]; //return to the nearest junction
+                currenty= keepy[a];
+                a--;
+
+            }
+        }
+
+    if(currentx == end1 && currenty == end2)return true;
+    return false;
+    }
+
+
+
+
+
+
 
     //to make each element unvested again
     void restart(){
@@ -168,23 +278,15 @@ public class Main {
         done = false;
     }
 
-    // solve the maze starting from the start state
- /*     public void solve() {
-        for (int x = 1; x < n; x++)
-            for (int y = 1; y < n; y++)
-                visited[x][y] = false;
-        done = false;
-        solve(1, 1);
-    }
-*/
+
 
     // draw the maze
     public void draw() {
         StdDraw.setPenColor(StdDraw.RED);
-        StdDraw.filledCircle(start1+0.5, start2+0.5, 0.375);
+        StdDraw.filledSquare(start1+0.5, start2+0.5, 0.375);
 
         StdDraw.setPenColor(StdDraw.YELLOW);
-        filledCircle(end1 + 0.5, end2 + 0.5, 0.375);
+        filledSquare(end1 + 0.5, end2 + 0.5, 0.375);
 
         StdDraw.setPenColor(StdDraw.BLACK);
         for (int x = 1; x < n; x++) {
@@ -212,23 +314,26 @@ public class Main {
         int algo = input.nextInt();
         maze.restart();
         if (algo == 1) {
-            int issolvable ;
-            issolvable = maze.solve1(maze.start1, maze.start2, maze.end1, maze.end2);
+            boolean issolvable ;
+            issolvable = maze.DFS(maze.start1, maze.start2);
+            System.out.println(issolvable);
+        }
+
+
+       maze.restart();
+        if (algo == 2) {
+            boolean issolvable ;
+            issolvable = maze.Amer();
             System.out.println(issolvable);
         }
 
 
 
 
-        // else if (algo == 2)maiz.solve2(maze.start1,maze.start2,maze.end1,maze.end2);
-       // else if (algo == 3)maiz.solve3(maze.start1,maze.start2,maze.end1,maze.end2);
-       // else if (algo == 4)maiz.solve4(maze.start1,maze.start2,maze.end1,maze.end2);
+       // else if (algo == 3)maiz.solve3(maze.start1,maze.start2);
+       // else if (algo == 4)maiz.solve4(maze.start1,maze.start2);
 
-        /*System.out.println(maze.start1);
-        System.out.println(maze.start2);
-        System.out.println(maze.end1);
-        System.out.println(maze.end2);
-*/
+
     }
 
 
