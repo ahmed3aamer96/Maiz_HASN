@@ -166,22 +166,7 @@ public class Main {
     }
 
 
-/*
-void fill(int i,int j){
-}
-    //the second algorithm (End Filling)
-    boolean EndFilling(int x, int y ){
-        for(int i =0 ;i< n ;i++){
-            for(int j=0;j< n ;j++){
-                if(southwall[i][j] == true && eastwall[i][j]== true && west [i][j]== true) {
-                    block[i][j] = true;
-                    fill(i,j);
-                }
-            }
-        }
-        return false ;
-    }
-*/
+
 
 
     boolean DFS_withoutrecursion() {
